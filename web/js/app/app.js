@@ -15,8 +15,17 @@ angular.module('planckApp', ['ngRoute']).config(['$routeProvider', function($rou
         redirectTo: '/'
       });
 }]).controller('TodoController', ['$scope', 'TodoAPI', function ($scope, todo) {
-    // store the content of a new item as it is entered
-    $scope.newItem = '';
+    var defaultItem = function () {
+        return {
+            id: null,
+            name: '',
+            completed: false
+        };
+    }
+    
+    // store the content of the current item as it is entered
+    // by default this will be a new item
+    $scope.currentItem = defaultItem();
     
     // populate the todo list upon instantiation
     todo.list().then(function successCallback(response) {
@@ -25,24 +34,25 @@ angular.module('planckApp', ['ngRoute']).config(['$routeProvider', function($rou
         $scope.todoList = response.data;
     }, errorHandler);
     
+    $scope.viewTodo = function (item) {
+        todo.view(item).then(function successCallback(response) {
+            $scope.currentItem = item;
+        }, errorHandler);
+    }
+    
     // add a new item to the list of things to do
     $scope.addItem = function () {
         // check for blank entries
-        if ($scope.newItem == '') {
+        if ($scope.currentItem.name == '') {
             alert('Sorry. You can\'t enter a blank todo!');
             return;
         }
-        
-        // build the data to send
-        var item = {
-            "name": $scope.newItem
-        };
-        
-        todo.add(item).then(function successCallback(response) {
+    
+        todo.add($scope.currentItem).then(function successCallback(response) {
             // push the item onto the list
             $scope.todoList.push(response.data);
             // reset the newItem text
-            $scope.newItem = '';
+            $scope.currentItem = defaultItem();
             // focus the new item input
             document.getElementById('todoEntry').focus();
         }, errorHandler);
@@ -54,6 +64,25 @@ angular.module('planckApp', ['ngRoute']).config(['$routeProvider', function($rou
             // remove from list
             var index = $scope.todoList.indexOf(item);
             $scope.todoList.splice(index, 1); 
+        }, errorHandler);
+    }
+    
+    $scope.completeTodo = function (item) {
+        item.completed = !item.completed;
+        todo.edit(item).then(function successCallback(response) {
+            var index = $scope.todoList.indexOf(item);
+            $scope.todoList[index] = item;
+        }, errorHandler);
+    }
+    
+    $scope.editTodo = function (item) {
+        // focus the new item input
+        document.getElementById('todoEntry').focus();
+        
+        todo.edit(item).then(function successCallback(response) {
+            var index = $scope.todoList.indexOf(item);
+            $scope.todoList[index] = item;
+            $scope.currentItem = defaultItem();
         }, errorHandler);
     }
     
@@ -74,10 +103,23 @@ angular.module('planckApp', ['ngRoute']).config(['$routeProvider', function($rou
                 url: '/api/todos'
             });
         },
+        view: function (item) {
+            return $http({
+                method: 'GET',
+                url: '/api/todos/' + item.id
+            })  
+        },
         add: function (item) {
             return $http({
                 method: 'POST',
                 url: '/api/todos',
+                data: item
+            });
+        },
+        edit: function (item) {
+            return $http({
+                method: 'PUT',
+                url: '/api/todos/' + item.id,
                 data: item
             });
         },

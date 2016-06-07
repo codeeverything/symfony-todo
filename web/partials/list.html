@@ -4,12 +4,13 @@
          <h1 style="text-transform: uppercase;">my todo list</h1>
             <div class="row">
                 <div class="col-xs-12">
-                    <input type="text" id="todoEntry" class="form-control add-todo" placeholder="Add todo" ng-model="newItem">        
+                    <input type="text" id="todoEntry" class="form-control add-todo" placeholder="Add todo" ng-model="currentItem.name">        
                 </div>
             </div>
             <div class="row" style="padding-top: 5px;">
                 <div class="col-xs-12">
-                    <button class="btn btn-success" ng-click="addItem()">Add</button>
+                    <button class="btn btn-success" ng-click="addItem()" ng-if="currentItem.id === null">Add</button>
+                    <button class="btn btn-success" ng-click="editTodo(currentItem)" ng-if="currentItem.id !== null">Save</button>
                 </div>
             </div>
             
@@ -17,8 +18,10 @@
             
             <table class="table table-striped">
                 <tr ng-repeat="item in todoList track by $index">
-                    <td>{{ item.name }}</td>
+                    <td ng-class="{completed: item.completed}">{{ item.name }}</td>
                     <td>
+                        <button class="btn btn-success fa fa-check" ng-click="completeTodo(item)"></button>
+                        <button class="btn btn-success fa fa-file" ng-click="viewTodo(item)"></button>
                         <button class="btn btn-danger fa fa-trash" ng-click="deleteTodo(item)"></button>
                     </td>
                 </tr>
