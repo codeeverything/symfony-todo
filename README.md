@@ -5,6 +5,6 @@ This is a simple test app using the [Symfony 3 framework](https://www.symfony.co
 ## TODO
 
 - [ ] Add authentication to API (OAuth/JWT)
-- [ ] Allow items to be completed vs deleted
-- [ ] Allow items to be edited
+- [x] Allow items to be completed vs deleted
+- [x] Allow items to be edited
 - [ ] Capture date/time against items
